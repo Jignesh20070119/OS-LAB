@@ -1,0 +1,16 @@
+import os
+def copy_file(src, dest):
+    fd_read = os.open(src, os.O_RDONLY)
+    fd_write = os.open(dest, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
+    while True:
+        data = os.read(fd_read, 1024)
+        if not data:  
+            break
+        os.write(fd_write, data)  
+    os.close(fd_read)
+    os.close(fd_write)
+
+    print("File copied successfully")
+
+if name == "main":
+    copy_file("source.txt", "destination.txt")
