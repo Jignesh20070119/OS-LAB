@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 5
+#define ITEMS 10   
+int buffer[BUFFER_SIZE];
+int in = 0, out = 0;
+int produced = 0, consumed = 0;
+sem_t empty, full, mutex;
+void *producer(void *arg) {
+    while (produced < ITEMS) {
+        sem_wait(&empty);
+        sem_wait(&mutex);
+        if (produced < ITEMS) {   
+            buffer[in] = ++produced;
+            printf("Producer produced: %d\n", buffer[in]);
+            in = (in + 1) % BUFFER_SIZE;
+        }
+        sem_post(&mutex);
+        sem_post(&full);
+        sleep(1);
+    }
+    return NULL;
+}
+void *consumer(void *arg) {
+    while (consumed < ITEMS) {
+        sem_wait(&full);
+        sem_wait(&mutex);
+        if (consumed < ITEMS) {   
+            consumed++;
+            int item = buffer[out];
+            printf("Consumer consumed: %d\n", item);
+            out = (out + 1) % BUFFER_SIZE;
+        }
+        sem_post(&mutex);
+        sem_post(&empty);
+        sleep(2);
+    }
+    return NULL;
+}
+int main() {
+    pthread_t prod, cons;
+    sem_init(&empty, 0, BUFFER_SIZE);
+    sem_init(&full, 0, 0);
+    sem_init(&mutex, 0, 1);
+    pthread_create(&prod, NULL, producer, NULL);
+    pthread_create(&cons, NULL, consumer, NULL);
+    pthread_join(prod, NULL);
+    pthread_join(cons, NULL);
+    printf("\nAll %d items produced and consumed. Program finished.\n", ITEMS);
+    return 0;
+}
