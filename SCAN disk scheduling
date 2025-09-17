@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int i, j, n, head, total = 0, direction, size;
+    
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+
+    int request[n];
+    printf("Enter the request sequence:\n");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &request[i]);
+    }
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    printf("Enter total disk size (max cylinder number): ");
+    scanf("%d", &size);
+
+    printf("Enter head movement direction (1 for high, 0 for low): ");
+    scanf("%d", &direction);
+
+    // Add head position and disk ends to request list
+    int temp[n+3], idx = 0;
+    for (i = 0; i < n; i++)
+        temp[idx++] = request[i];
+    temp[idx++] = head;
+    if (direction == 1)
+        temp[idx++] = size - 1;
+    else
+        temp[idx++] = 0;
+
+    // Sort the request array
+    for (i = 0; i < idx - 1; i++) {
+        for (j = i + 1; j < idx; j++) {
+            if (temp[i] > temp[j]) {
+                int t = temp[i];
+                temp[i] = temp[j];
+                temp[j] = t;
+            }
+        }
+    }
+
+    // Find head position index
+    int pos;
+    for (i = 0; i < idx; i++) {
+        if (temp[i] == head) {
+            pos = i;
+            break;
+        }
+    }
+
+    printf("\nSequence of head movement:\n");
+    printf("%d", head);
+
+    // Move right
+    if (direction == 1) {
+        for (i = pos + 1; i < idx; i++) {
+            total += abs(head - temp[i]);
+            head = temp[i];
+            printf(" -> %d", head);
+        }
+        // Then move left
+        for (i = pos - 1; i >= 0; i--) {
+            total += abs(head - temp[i]);
+            head = temp[i];
+            printf(" -> %d", head);
+        }
+    }
+    // Move left
+    else {
+        for (i = pos - 1; i >= 0; i--) {
+            total += abs(head - temp[i]);
+            head = temp[i];
+            printf(" -> %d", head);
+        }
+        // Then move right
+        for (i = pos + 1; i < idx; i++) {
+            total += abs(head - temp[i]);
+            head = temp[i];
+            printf(" -> %d", head);
+        }
+    }
+
+    printf("\n\nTotal Seek Time: %d\n", total);
+    printf("Average Seek Time: %.2f\n", (float) total / n);
+
+    return 0;
+}
