@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_LINE 1024   // maximum line size
+
+int main(int argc, char *argv[]) {
+    FILE *fp;
+    char line[MAX_LINE];
+    char *pattern;
+    char *filename;
+    int line_num = 0;
+    int found = 0;
+
+    // Check usage
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s <pattern> <filename>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    pattern = argv[1];
+    filename = argv[2];
+
+    // Open file
+    fp = fopen(filename, "r");
+    if (fp == NULL) {
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+
+    // Read file line by line
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        line_num++;
+        if (strstr(line, pattern) != NULL) {   // check if pattern exists in line
+            printf("%d: %s", line_num, line);
+            found = 1;
+        }
+    }
+
+    if (!found) {
+        printf("Pattern '%s' not found in %s\n", pattern, filename);
+    }
+
+    fclose(fp);
+    return 0;
+}
