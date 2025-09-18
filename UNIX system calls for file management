@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <fcntl.h>      // for open()
+#include <unistd.h>     // for read(), write(), close(), lseek()
+#include <string.h>     // for strlen()
+#include <stdlib.h>     // for exit()
+
+int main() {
+    int fd;  
+    char buffer[100];  
+    ssize_t bytesRead;
+
+    // 1. Create/Open file
+    fd = open("demo.txt", O_CREAT | O_RDWR, 0644);
+    if (fd < 0) {
+        perror("Error opening file");
+        exit(1);
+    }
+    printf("File opened successfully with descriptor %d\n", fd);
+
+    // 2. Write to file
+    char *text = "Hello, this is a UNIX system call demo.\n";
+    if (write(fd, text, strlen(text)) < 0) {
+        perror("Error writing to file");
+        close(fd);
+        exit(1);
+    }
+    printf("Data written successfully.\n");
+
+    // 3. Move file pointer to beginning
+    lseek(fd, 0, SEEK_SET);
+
+    // 4. Read data from file
+    bytesRead = read(fd, buffer, sizeof(buffer)-1);
+    if (bytesRead < 0) {
+        perror("Error reading file");
+        close(fd);
+        exit(1);
+    }
+    buffer[bytesRead] = '\0';  // Null terminate
+    printf("Data read from file:\n%s", buffer);
+
+    // 5. Close file
+    if (close(fd) < 0) {
+        perror("Error closing file");
+        exit(1);
+    }
+    printf("\nFile closed successfully.\n");
+
+    return 0;
+}
